@@ -1,10 +1,29 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Flow xmlns="http://soap.sforce.com/2006/04/metadata">
+    <apiVersion>61.0</apiVersion>
+    <description>Record-Triggered Flow: when a Quote is Contracted, create one Asset per Hardware Quote Line. Fault path calls FlowErrorHandler and posts the cleaned message to Chatter on the Quote.</description>
+    <environments>Default</environments>
+    <interviewLabel>Quote Contracted - Create Assets {!$Flow.CurrentDateTime}</interviewLabel>
+    <label>Quote Contracted - Create Assets</label>
+    <processMetadataValues>
+        <name>BuilderType</name>
+        <value>
+            <stringValue>LightningFlowBuilder</stringValue>
+        </value>
+    </processMetadataValues>
+    <processMetadataValues>
+        <name>CanvasMode</name>
+        <value>
+            <stringValue>AUTO_LAYOUT_CANVAS</stringValue>
+        </value>
+    </processMetadataValues>
+    <processType>AutoLaunchedFlow</processType>
+    <status>Active</status>
     <actionCalls>
         <name>Call_FlowErrorHandler</name>
         <label>Clean Fault Message</label>
-        <locationX>528</locationX>
-        <locationY>755</locationY>
+        <locationX>320</locationX>
+        <locationY>840</locationY>
         <actionName>FlowErrorHandler</actionName>
         <actionType>apex</actionType>
         <connector>
@@ -18,14 +37,13 @@
             </value>
         </inputParameters>
         <nameSegment>FlowErrorHandler</nameSegment>
-        <offset>0</offset>
         <storeOutputAutomatically>true</storeOutputAutomatically>
     </actionCalls>
     <actionCalls>
         <name>Post_Fault_To_Chatter</name>
         <label>Post Fault to Chatter</label>
-        <locationX>528</locationX>
-        <locationY>971</locationY>
+        <locationX>320</locationX>
+        <locationY>1080</locationY>
         <actionName>chatterPost</actionName>
         <actionType>chatterPost</actionType>
         <flowTransactionModel>CurrentTransaction</flowTransactionModel>
@@ -42,13 +60,12 @@
             </value>
         </inputParameters>
         <nameSegment>chatterPost</nameSegment>
-        <offset>0</offset>
     </actionCalls>
     <actionCalls>
         <name>Post_Success_To_Chatter</name>
         <label>Post Success to Chatter</label>
-        <locationX>176</locationX>
-        <locationY>1295</locationY>
+        <locationX>50</locationX>
+        <locationY>720</locationY>
         <actionName>chatterPost</actionName>
         <actionType>chatterPost</actionType>
         <flowTransactionModel>CurrentTransaction</flowTransactionModel>
@@ -65,15 +82,34 @@
             </value>
         </inputParameters>
         <nameSegment>chatterPost</nameSegment>
-        <offset>0</offset>
     </actionCalls>
-    <apiVersion>61.0</apiVersion>
-    <areMetricsLoggedToDataCloud>false</areMetricsLoggedToDataCloud>
+    <actionCalls>
+        <name>Post_No_Hardware_Lines_To_Chatter</name>
+        <label>Post No Hardware Lines to Chatter</label>
+        <locationX>180</locationX>
+        <locationY>720</locationY>
+        <actionName>chatterPost</actionName>
+        <actionType>chatterPost</actionType>
+        <flowTransactionModel>CurrentTransaction</flowTransactionModel>
+        <inputParameters>
+            <name>subjectNameOrId</name>
+            <value>
+                <elementReference>$Record.Id</elementReference>
+            </value>
+        </inputParameters>
+        <inputParameters>
+            <name>text</name>
+            <value>
+                <stringValue>This Quote was Contracted but contains no Hardware items, so no Assets were created.</stringValue>
+            </value>
+        </inputParameters>
+        <nameSegment>chatterPost</nameSegment>
+    </actionCalls>
     <assignments>
         <name>Assign_Cleaned_Message</name>
-        <label>Build Chatter Error Body</label>
-        <locationX>528</locationX>
-        <locationY>863</locationY>
+        <label>Build Chatter Error Body (Prefix)</label>
+        <locationX>320</locationX>
+        <locationY>960</locationY>
         <assignmentItems>
             <assignToReference>varChatterMessage</assignToReference>
             <operator>Assign</operator>
@@ -81,6 +117,15 @@
                 <stringValue>Asset creation failed. Reason: </stringValue>
             </value>
         </assignmentItems>
+        <connector>
+            <targetReference>Append_Cleaned_Reason</targetReference>
+        </connector>
+    </assignments>
+    <assignments>
+        <name>Append_Cleaned_Reason</name>
+        <label>Append Cleaned Reason</label>
+        <locationX>320</locationX>
+        <locationY>1020</locationY>
         <assignmentItems>
             <assignToReference>varChatterMessage</assignToReference>
             <operator>Add</operator>
@@ -95,8 +140,8 @@
     <assignments>
         <name>Assign_FaultToList</name>
         <label>Wrap Fault as List</label>
-        <locationX>528</locationX>
-        <locationY>647</locationY>
+        <locationX>320</locationX>
+        <locationY>720</locationY>
         <assignmentItems>
             <assignToReference>varRawMessagesList</assignToReference>
             <operator>Add</operator>
@@ -108,54 +153,72 @@
             <targetReference>Call_FlowErrorHandler</targetReference>
         </connector>
     </assignments>
-    <description>Record-Triggered Flow: when a Quote is Contracted, create one Asset per Hardware Quote Line. Asset is created with Status = Installed, Fault path calls FlowErrorHandler and posts the cleaned message to Chatter on the Quote.</description>
-    <environments>Default</environments>
-    <interviewLabel>Quote Contracted - Create Assets {!$Flow.CurrentDateTime}</interviewLabel>
-    <label>Quote Contracted - Create Assets</label>
+    <assignments>
+        <name>Increment_Asset_Counter</name>
+        <label>Increment Asset Counter</label>
+        <locationX>50</locationX>
+        <locationY>540</locationY>
+        <assignmentItems>
+            <assignToReference>varAssetCount</assignToReference>
+            <operator>Add</operator>
+            <value>
+                <numberValue>1.0</numberValue>
+            </value>
+        </assignmentItems>
+        <connector>
+            <targetReference>Loop_QuoteLines</targetReference>
+        </connector>
+    </assignments>
+    <decisions>
+        <name>Decision_Were_Assets_Created</name>
+        <label>Were Any Assets Created?</label>
+        <locationX>176</locationX>
+        <locationY>540</locationY>
+        <defaultConnector>
+            <targetReference>Post_No_Hardware_Lines_To_Chatter</targetReference>
+        </defaultConnector>
+        <defaultConnectorLabel>No Hardware Lines</defaultConnectorLabel>
+        <rules>
+            <name>Yes_Assets_Created</name>
+            <conditionLogic>and</conditionLogic>
+            <conditions>
+                <leftValueReference>varAssetCount</leftValueReference>
+                <operator>GreaterThan</operator>
+                <rightValue>
+                    <numberValue>0.0</numberValue>
+                </rightValue>
+            </conditions>
+            <connector>
+                <targetReference>Post_Success_To_Chatter</targetReference>
+            </connector>
+            <label>Yes</label>
+        </rules>
+    </decisions>
     <loops>
         <name>Loop_QuoteLines</name>
         <label>Loop Quote Lines</label>
         <locationX>176</locationX>
-        <locationY>431</locationY>
+        <locationY>240</locationY>
         <collectionReference>Get_Hardware_Quote_Lines</collectionReference>
         <iterationOrder>Asc</iterationOrder>
         <nextValueConnector>
             <targetReference>Create_Asset</targetReference>
         </nextValueConnector>
         <noMoreValuesConnector>
-            <targetReference>Post_Success_To_Chatter</targetReference>
+            <targetReference>Decision_Were_Assets_Created</targetReference>
         </noMoreValuesConnector>
     </loops>
-    <processMetadataValues>
-        <name>BuilderType</name>
-        <value>
-            <stringValue>LightningFlowBuilder</stringValue>
-        </value>
-    </processMetadataValues>
-    <processMetadataValues>
-        <name>CanvasMode</name>
-        <value>
-            <stringValue>AUTO_LAYOUT_CANVAS</stringValue>
-        </value>
-    </processMetadataValues>
-    <processType>AutoLaunchedFlow</processType>
     <recordCreates>
         <name>Create_Asset</name>
         <label>Create Asset</label>
-        <locationX>264</locationX>
-        <locationY>539</locationY>
+        <locationX>50</locationX>
+        <locationY>480</locationY>
         <connector>
-            <targetReference>Loop_QuoteLines</targetReference>
+            <targetReference>Increment_Asset_Counter</targetReference>
         </connector>
         <faultConnector>
             <targetReference>Assign_FaultToList</targetReference>
         </faultConnector>
-        <inputAssignments>
-            <field>AccountId</field>
-            <value>
-                <elementReference>$Record.SBQQ__Account__c</elementReference>
-            </value>
-        </inputAssignments>
         <inputAssignments>
             <field>Name</field>
             <value>
@@ -163,9 +226,15 @@
             </value>
         </inputAssignments>
         <inputAssignments>
-            <field>Price</field>
+            <field>AccountId</field>
             <value>
-                <elementReference>Loop_QuoteLines.SBQQ__NetPrice__c</elementReference>
+                <elementReference>$Record.SBQQ__Account__c</elementReference>
+            </value>
+        </inputAssignments>
+        <inputAssignments>
+            <field>ContactId</field>
+            <value>
+                <elementReference>$Record.SBQQ__PrimaryContact__c</elementReference>
             </value>
         </inputAssignments>
         <inputAssignments>
@@ -175,21 +244,27 @@
             </value>
         </inputAssignments>
         <inputAssignments>
-            <field>PurchaseDate</field>
-            <value>
-                <elementReference>$Flow.CurrentDate</elementReference>
-            </value>
-        </inputAssignments>
-        <inputAssignments>
             <field>Quantity</field>
             <value>
                 <elementReference>Loop_QuoteLines.SBQQ__Quantity__c</elementReference>
             </value>
         </inputAssignments>
         <inputAssignments>
+            <field>Price</field>
+            <value>
+                <elementReference>Loop_QuoteLines.SBQQ__NetPrice__c</elementReference>
+            </value>
+        </inputAssignments>
+        <inputAssignments>
             <field>Status</field>
             <value>
                 <stringValue>Purchased</stringValue>
+            </value>
+        </inputAssignments>
+        <inputAssignments>
+            <field>PurchaseDate</field>
+            <value>
+                <elementReference>$Flow.CurrentDate</elementReference>
             </value>
         </inputAssignments>
         <object>Asset</object>
@@ -199,7 +274,7 @@
         <name>Get_Hardware_Quote_Lines</name>
         <label>Get Hardware Quote Lines</label>
         <locationX>176</locationX>
-        <locationY>323</locationY>
+        <locationY>120</locationY>
         <assignNullValuesIfNoRecordsFound>false</assignNullValuesIfNoRecordsFound>
         <connector>
             <targetReference>Loop_QuoteLines</targetReference>
@@ -242,7 +317,14 @@
         <recordTriggerType>Update</recordTriggerType>
         <triggerType>RecordAfterSave</triggerType>
     </start>
-    <status>Active</status>
+    <variables>
+        <name>varAssetCount</name>
+        <dataType>Number</dataType>
+        <isCollection>false</isCollection>
+        <isInput>false</isInput>
+        <isOutput>false</isOutput>
+        <scale>0</scale>
+    </variables>
     <variables>
         <name>varChatterMessage</name>
         <dataType>String</dataType>
