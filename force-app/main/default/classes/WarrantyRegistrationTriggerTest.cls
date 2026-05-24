@@ -2,6 +2,8 @@
  * @description  Tests for WarrantyRegistrationTriggerHandler. Verifies the
  *               addError() complex validations fire as expected and that
  *               valid records save cleanly.
+ * 
+ * @author         Harshal Ramdham
  */
 @IsTest
 private class WarrantyRegistrationTriggerTest {

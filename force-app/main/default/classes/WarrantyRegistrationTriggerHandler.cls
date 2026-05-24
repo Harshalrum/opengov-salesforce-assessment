@@ -10,7 +10,7 @@
  *                  2. The Asset on the warranty must belong to the same
  *                     Account as the warranty itself. (Cross-object check.)
  *
- * @author         OpenGov Candidate Submission
+ * @author         Harshal Ramdham
  */
 public with sharing class WarrantyRegistrationTriggerHandler extends TriggerHandler {
 

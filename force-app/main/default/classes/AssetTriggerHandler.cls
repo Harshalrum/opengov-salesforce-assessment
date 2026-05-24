@@ -10,7 +10,7 @@
  *                    or queries, making it reusable from REST APIs, Flows,
  *                    batch jobs, etc.
  *
- * @author         OpenGov Candidate Submission
+ * @author         Harshal Ramdham
  */
 public with sharing class AssetTriggerHandler extends TriggerHandler {
 

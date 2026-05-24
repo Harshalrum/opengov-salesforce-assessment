@@ -189,7 +189,7 @@
         <inputAssignments>
             <field>Status</field>
             <value>
-                <stringValue>Installed</stringValue>
+                <stringValue>Purchased</stringValue>
             </value>
         </inputAssignments>
         <object>Asset</object>

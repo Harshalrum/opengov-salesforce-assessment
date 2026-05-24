@@ -1,6 +1,6 @@
 /**
  * @description    Service layer for Asset business logic. Following the
- *                 Enterprise Apex pattern (Andy Fawcett), all DML and
+ *                 Enterprise Apex pattern, all DML and
  *                 business rules live here - the Trigger Handler only
  *                 routes context, and the Trigger itself only delegates.
  *
@@ -11,7 +11,7 @@
  *                    move from another status to Installed on update.
  *                  - Guard against bulk DML limits (200+ records).
  *
- * @author         OpenGov Candidate Submission
+ * @author         Harshal Ramdham
  */
 public with sharing class AssetService {
 

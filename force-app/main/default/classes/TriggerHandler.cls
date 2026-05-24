@@ -10,7 +10,7 @@
  *                  - Standardized hook points (beforeInsert, afterUpdate, etc.).
  *                  - Easy to disable in tests or for specific bulk loads.
  *
- * @author         OpenGov Candidate Submission
+ * @author         Harshal Ramdham
  * @date           2026
  */
 public virtual class TriggerHandler {

@@ -12,12 +12,12 @@
  *                  - If the user is internal (no Contact), defensive guard
  *                    returns an empty list rather than leaking data.
  *
- * @author         OpenGov Candidate Submission
+ * @author         Harshal Ramdham
  */
 public with sharing class CommunityPortalController {
 
     // ------------------------------------------------------------------
-    // Public DTOs - returned to LWCs (never raw SObjects, so we can
+    // Public Data Transfer Object(DTOs) - returned to LWCs (never raw SObjects, so we can
     // shape the JSON cleanly and add/remove fields without breaking
     // the contract with the frontend).
     // ------------------------------------------------------------------

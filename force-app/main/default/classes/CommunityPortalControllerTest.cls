@@ -13,6 +13,8 @@
  *                  bodies execute against real test data.
  *                - registerWarranty exercises insert, the trigger handler,
  *                  the addError() validations, and FlowErrorHandler cleaning.
+ * 
+ * @author         Harshal Ramdham
  */
 @IsTest
 private class CommunityPortalControllerTest {

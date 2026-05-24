@@ -2,6 +2,8 @@
  * @description  Tests for AssetService and AssetTrigger. Specifically proves
  *               that 200+ Assets in a single transaction produce exactly ONE
  *               account query and ONE Task insert DML (bulkification).
+ * 
+ * @author       Harshal Ramdham
  */
 @IsTest
 private class AssetServiceTest {

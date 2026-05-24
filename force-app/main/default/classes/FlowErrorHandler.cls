@@ -13,7 +13,7 @@
  *
  * @usage          Called from the Fault Path of a Create Records element.
  *
- * @author         OpenGov Candidate Submission
+ * @author         Harshal Ramdham
  */
 public with sharing class FlowErrorHandler {
 
