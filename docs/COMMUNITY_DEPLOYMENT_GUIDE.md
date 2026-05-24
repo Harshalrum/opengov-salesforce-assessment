@@ -46,10 +46,10 @@ Save the credentials emailed to you — you'll log in as this user.
 
 ---
 
-## Phase 5 — Permission Set: "Community Warranty Access"
+## Phase 5 — Permission Set: "Community Portal Access"
 
 Setup → Permission Sets → **New**
-- Label: `Community Warranty Access`
+- Label: `Community Portal Access`
 - License: **Customer Community Plus**
 - Save
 
