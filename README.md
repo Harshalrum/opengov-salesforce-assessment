@@ -10,12 +10,10 @@ Submitted by **Harshal Ramdham**
 
 | Want to... | Open this |
 |---|---|
-| 🎥 Watch a 3-min walkthrough | [Loom Video](https://www.loom.com/YOUR-LINK-HERE) |
 | 📐 See the schema & assumptions | [docs/OpenGov_Schema_Design.pdf](docs/OpenGov_Schema_Design.pdf) |
 | 📘 Read the full design | [docs/OpenGov_Solution_Design_Document.pdf](docs/OpenGov_Solution_Design_Document.pdf) |
 | 🌐 See the Community work | [docs/OpenGov_Community_Addendum.pdf](docs/OpenGov_Community_Addendum.pdf) |
 | 🛠 Deploy the solution | [docs/COMMUNITY_DEPLOYMENT_GUIDE.md](docs/COMMUNITY_DEPLOYMENT_GUIDE.md) |
-| 🎬 Follow the demo flow | [docs/DEMO_SCRIPT.md](docs/DEMO_SCRIPT.md) |
 | 🚀 Deploy via CLI | `sf project deploy start -d force-app -o YOUR_ORG` |
 | ✅ Run all tests | `sf apex test run -o YOUR_ORG --code-coverage` |
 
@@ -109,8 +107,8 @@ Some configuration is point-and-click and can't live in source control. See the 
 ## 🚫 What's NOT Included (and Why)
 
 - **Customer-facing Quote configurator** — Customers don't configure their own quotes; that's a sales rep workflow
-- **Custom logging object** — Designed in §9.2 of the [design document](docs/OpenGov_Solution_Design_Document.pdf); uses `System.debug()` for assessment scope
-- **CI/CD pipeline** — Documented in §9.3 of the [design document](docs/OpenGov_Solution_Design_Document.pdf); out of build scope
+- **Custom logging object** — Designed in Section 9.2 of the [design document](docs/OpenGov_Solution_Design_Document.pdf); uses `System.debug()` for assessment scope
+- **CI/CD pipeline** — Documented in Section 9.3 of the [design document](docs/OpenGov_Solution_Design_Document.pdf); out of build scope
 
 See the **Future State Recommendations** section of the [design document](docs/OpenGov_Solution_Design_Document.pdf) for the full roadmap.
 
