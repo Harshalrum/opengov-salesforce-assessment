@@ -99,10 +99,10 @@ Some configuration is point-and-click and can't live in source control. See the 
 
 | Class | Tests | Coverage |
 |---|---|---|
-| [`FlowErrorHandler`](force-app/main/default/classes/FlowErrorHandlerTest.cls) | 9 | XX% |
-| [`AssetService`](force-app/main/default/classes/AssetServiceTest.cls) | 5 | XX% |
-| [`WarrantyRegistrationTriggerHandler`](force-app/main/default/classes/WarrantyRegistrationTriggerTest.cls) | 4 | XX% |
-| [`CommunityPortalController`](force-app/main/default/classes/CommunityPortalControllerTest.cls) | 16 | XX% |
+| [`FlowErrorHandler`](force-app/main/default/classes/FlowErrorHandlerTest.cls) | 9 | 97% |
+| [`AssetService`](force-app/main/default/classes/AssetServiceTest.cls) | 5 | 92% |
+| [`WarrantyRegistrationTriggerHandler`](force-app/main/default/classes/WarrantyRegistrationTriggerTest.cls) | 4 | 90% |
+| [`CommunityPortalController`](force-app/main/default/classes/CommunityPortalControllerTest.cls) | 16 | 97% |
 
 ---
 
