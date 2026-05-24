@@ -69,10 +69,10 @@ Some configuration is point-and-click and can't live in source control. See `doc
 
 | Class | Tests | Coverage |
 |---|---|---|
-| FlowErrorHandler | 9 | XX% |
-| AssetService | 5 | XX% |
-| WarrantyRegistrationTriggerHandler | 4 | XX% |
-| CommunityPortalController | 16 | XX% |
+| FlowErrorHandler | 9 | 97% |
+| AssetService | 5 | 92% |
+| WarrantyRegistrationTriggerHandler | 4 | 90% |
+| CommunityPortalController | 16 | 97% |
 
 ---
 
