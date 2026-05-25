@@ -126,7 +126,7 @@ In the spirit of transparency and modern engineering practice, I want to be expl
  
 ### 1. Documentation drafting and editing
  
-I used AI to help draft and polish the documentation deliverables — the Design Document, the Community Addendum, the Deployment Guide, and the Demo Script. The technical content, architectural decisions, schema design, and trade-off rationale in those documents are mine; AI helped translate my notes into well-structured, professional prose, suggested table-based formats for comparison sections, and caught grammar/clarity issues during editing passes. This is the same way I'd use a technical writer or editor on a real project — the substance is mine, the polish is collaborative.
+I used AI to help draft and polish the documentation deliverables — the Design Document, the Community Addendum, and the Deployment Guide. The technical content, architectural decisions, schema design, and trade-off rationale in those documents are mine; AI helped translate my notes into well-structured, professional prose, suggested table-based formats for comparison sections, and caught grammar/clarity issues during editing passes. This is the same way I'd use a technical writer or editor on a real project — the substance is mine, the polish is collaborative.
  
 ### 2. Apex code commenting and documentation
  
