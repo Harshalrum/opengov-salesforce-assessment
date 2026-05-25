@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Flow xmlns="http://soap.sforce.com/2006/04/metadata">
     <apiVersion>61.0</apiVersion>
-    <description>Record-Triggered Flow: when a Quote is Contracted, create one Asset per Hardware Quote Line. Fault path calls FlowErrorHandler and posts the cleaned message to Chatter on the Quote.</description>
+    <description>Record-Triggered Flow: when a Quote is Contracted, create one Asset per Hardware Quote Line using bulk DML (single Create Records call outside the loop). Fault path calls FlowErrorHandler and posts the cleaned message to Chatter on the Quote.</description>
     <environments>Default</environments>
     <interviewLabel>Quote Contracted - Create Assets {!$Flow.CurrentDateTime}</interviewLabel>
     <label>Quote Contracted - Create Assets</label>
@@ -23,7 +23,7 @@
         <name>Call_FlowErrorHandler</name>
         <label>Clean Fault Message</label>
         <locationX>320</locationX>
-        <locationY>840</locationY>
+        <locationY>960</locationY>
         <actionName>FlowErrorHandler</actionName>
         <actionType>apex</actionType>
         <connector>
@@ -43,7 +43,7 @@
         <name>Post_Fault_To_Chatter</name>
         <label>Post Fault to Chatter</label>
         <locationX>320</locationX>
-        <locationY>1080</locationY>
+        <locationY>1200</locationY>
         <actionName>chatterPost</actionName>
         <actionType>chatterPost</actionType>
         <flowTransactionModel>CurrentTransaction</flowTransactionModel>
@@ -65,7 +65,7 @@
         <name>Post_Success_To_Chatter</name>
         <label>Post Success to Chatter</label>
         <locationX>50</locationX>
-        <locationY>720</locationY>
+        <locationY>840</locationY>
         <actionName>chatterPost</actionName>
         <actionType>chatterPost</actionType>
         <flowTransactionModel>CurrentTransaction</flowTransactionModel>
@@ -87,7 +87,7 @@
         <name>Post_No_Hardware_Lines_To_Chatter</name>
         <label>Post No Hardware Lines to Chatter</label>
         <locationX>180</locationX>
-        <locationY>720</locationY>
+        <locationY>840</locationY>
         <actionName>chatterPost</actionName>
         <actionType>chatterPost</actionType>
         <flowTransactionModel>CurrentTransaction</flowTransactionModel>
@@ -106,10 +106,91 @@
         <nameSegment>chatterPost</nameSegment>
     </actionCalls>
     <assignments>
+        <name>Build_Asset_In_Memory</name>
+        <label>Build Asset In Memory</label>
+        <locationX>50</locationX>
+        <locationY>360</locationY>
+        <assignmentItems>
+            <assignToReference>varNewAsset.Name</assignToReference>
+            <operator>Assign</operator>
+            <value>
+                <elementReference>Loop_QuoteLines.SBQQ__ProductName__c</elementReference>
+            </value>
+        </assignmentItems>
+        <assignmentItems>
+            <assignToReference>varNewAsset.AccountId</assignToReference>
+            <operator>Assign</operator>
+            <value>
+                <elementReference>$Record.SBQQ__Account__c</elementReference>
+            </value>
+        </assignmentItems>
+        <assignmentItems>
+            <assignToReference>varNewAsset.ContactId</assignToReference>
+            <operator>Assign</operator>
+            <value>
+                <elementReference>$Record.SBQQ__PrimaryContact__c</elementReference>
+            </value>
+        </assignmentItems>
+        <assignmentItems>
+            <assignToReference>varNewAsset.Product2Id</assignToReference>
+            <operator>Assign</operator>
+            <value>
+                <elementReference>Loop_QuoteLines.SBQQ__Product__c</elementReference>
+            </value>
+        </assignmentItems>
+        <assignmentItems>
+            <assignToReference>varNewAsset.Quantity</assignToReference>
+            <operator>Assign</operator>
+            <value>
+                <elementReference>Loop_QuoteLines.SBQQ__Quantity__c</elementReference>
+            </value>
+        </assignmentItems>
+        <assignmentItems>
+            <assignToReference>varNewAsset.Price</assignToReference>
+            <operator>Assign</operator>
+            <value>
+                <elementReference>Loop_QuoteLines.SBQQ__NetPrice__c</elementReference>
+            </value>
+        </assignmentItems>
+        <assignmentItems>
+            <assignToReference>varNewAsset.Status</assignToReference>
+            <operator>Assign</operator>
+            <value>
+                <stringValue>Purchased</stringValue>
+            </value>
+        </assignmentItems>
+        <assignmentItems>
+            <assignToReference>varNewAsset.PurchaseDate</assignToReference>
+            <operator>Assign</operator>
+            <value>
+                <elementReference>$Flow.CurrentDate</elementReference>
+            </value>
+        </assignmentItems>
+        <connector>
+            <targetReference>Add_Asset_To_Collection</targetReference>
+        </connector>
+    </assignments>
+    <assignments>
+        <name>Add_Asset_To_Collection</name>
+        <label>Add Asset To Collection</label>
+        <locationX>50</locationX>
+        <locationY>480</locationY>
+        <assignmentItems>
+            <assignToReference>varAssetsToCreate</assignToReference>
+            <operator>Add</operator>
+            <value>
+                <elementReference>varNewAsset</elementReference>
+            </value>
+        </assignmentItems>
+        <connector>
+            <targetReference>Loop_QuoteLines</targetReference>
+        </connector>
+    </assignments>
+    <assignments>
         <name>Assign_Cleaned_Message</name>
         <label>Build Chatter Error Body (Prefix)</label>
         <locationX>320</locationX>
-        <locationY>960</locationY>
+        <locationY>1080</locationY>
         <assignmentItems>
             <assignToReference>varChatterMessage</assignToReference>
             <operator>Assign</operator>
@@ -125,7 +206,7 @@
         <name>Append_Cleaned_Reason</name>
         <label>Append Cleaned Reason</label>
         <locationX>320</locationX>
-        <locationY>1020</locationY>
+        <locationY>1140</locationY>
         <assignmentItems>
             <assignToReference>varChatterMessage</assignToReference>
             <operator>Add</operator>
@@ -141,7 +222,7 @@
         <name>Assign_FaultToList</name>
         <label>Wrap Fault as List</label>
         <locationX>320</locationX>
-        <locationY>720</locationY>
+        <locationY>840</locationY>
         <assignmentItems>
             <assignToReference>varRawMessagesList</assignToReference>
             <operator>Add</operator>
@@ -153,43 +234,27 @@
             <targetReference>Call_FlowErrorHandler</targetReference>
         </connector>
     </assignments>
-    <assignments>
-        <name>Increment_Asset_Counter</name>
-        <label>Increment Asset Counter</label>
-        <locationX>50</locationX>
-        <locationY>540</locationY>
-        <assignmentItems>
-            <assignToReference>varAssetCount</assignToReference>
-            <operator>Add</operator>
-            <value>
-                <numberValue>1.0</numberValue>
-            </value>
-        </assignmentItems>
-        <connector>
-            <targetReference>Loop_QuoteLines</targetReference>
-        </connector>
-    </assignments>
     <decisions>
-        <name>Decision_Were_Assets_Created</name>
-        <label>Were Any Assets Created?</label>
+        <name>Decision_Any_Assets_To_Create</name>
+        <label>Any Assets To Create?</label>
         <locationX>176</locationX>
-        <locationY>540</locationY>
+        <locationY>600</locationY>
         <defaultConnector>
             <targetReference>Post_No_Hardware_Lines_To_Chatter</targetReference>
         </defaultConnector>
         <defaultConnectorLabel>No Hardware Lines</defaultConnectorLabel>
         <rules>
-            <name>Yes_Assets_Created</name>
+            <name>Yes_Has_Assets</name>
             <conditionLogic>and</conditionLogic>
             <conditions>
-                <leftValueReference>varAssetCount</leftValueReference>
-                <operator>GreaterThan</operator>
+                <leftValueReference>varAssetsToCreate</leftValueReference>
+                <operator>IsNull</operator>
                 <rightValue>
-                    <numberValue>0.0</numberValue>
+                    <booleanValue>false</booleanValue>
                 </rightValue>
             </conditions>
             <connector>
-                <targetReference>Post_Success_To_Chatter</targetReference>
+                <targetReference>Create_Assets_Bulk</targetReference>
             </connector>
             <label>Yes</label>
         </rules>
@@ -202,73 +267,24 @@
         <collectionReference>Get_Hardware_Quote_Lines</collectionReference>
         <iterationOrder>Asc</iterationOrder>
         <nextValueConnector>
-            <targetReference>Create_Asset</targetReference>
+            <targetReference>Build_Asset_In_Memory</targetReference>
         </nextValueConnector>
         <noMoreValuesConnector>
-            <targetReference>Decision_Were_Assets_Created</targetReference>
+            <targetReference>Decision_Any_Assets_To_Create</targetReference>
         </noMoreValuesConnector>
     </loops>
     <recordCreates>
-        <name>Create_Asset</name>
-        <label>Create Asset</label>
+        <name>Create_Assets_Bulk</name>
+        <label>Create Assets (Bulk)</label>
         <locationX>50</locationX>
-        <locationY>480</locationY>
+        <locationY>720</locationY>
         <connector>
-            <targetReference>Increment_Asset_Counter</targetReference>
+            <targetReference>Post_Success_To_Chatter</targetReference>
         </connector>
         <faultConnector>
             <targetReference>Assign_FaultToList</targetReference>
         </faultConnector>
-        <inputAssignments>
-            <field>Name</field>
-            <value>
-                <elementReference>Loop_QuoteLines.SBQQ__ProductName__c</elementReference>
-            </value>
-        </inputAssignments>
-        <inputAssignments>
-            <field>AccountId</field>
-            <value>
-                <elementReference>$Record.SBQQ__Account__c</elementReference>
-            </value>
-        </inputAssignments>
-        <inputAssignments>
-            <field>ContactId</field>
-            <value>
-                <elementReference>$Record.SBQQ__PrimaryContact__c</elementReference>
-            </value>
-        </inputAssignments>
-        <inputAssignments>
-            <field>Product2Id</field>
-            <value>
-                <elementReference>Loop_QuoteLines.SBQQ__Product__c</elementReference>
-            </value>
-        </inputAssignments>
-        <inputAssignments>
-            <field>Quantity</field>
-            <value>
-                <elementReference>Loop_QuoteLines.SBQQ__Quantity__c</elementReference>
-            </value>
-        </inputAssignments>
-        <inputAssignments>
-            <field>Price</field>
-            <value>
-                <elementReference>Loop_QuoteLines.SBQQ__NetPrice__c</elementReference>
-            </value>
-        </inputAssignments>
-        <inputAssignments>
-            <field>Status</field>
-            <value>
-                <stringValue>Purchased</stringValue>
-            </value>
-        </inputAssignments>
-        <inputAssignments>
-            <field>PurchaseDate</field>
-            <value>
-                <elementReference>$Flow.CurrentDate</elementReference>
-            </value>
-        </inputAssignments>
-        <object>Asset</object>
-        <storeOutputAutomatically>true</storeOutputAutomatically>
+        <inputReference>varAssetsToCreate</inputReference>
     </recordCreates>
     <recordLookups>
         <name>Get_Hardware_Quote_Lines</name>
@@ -318,12 +334,20 @@
         <triggerType>RecordAfterSave</triggerType>
     </start>
     <variables>
-        <name>varAssetCount</name>
-        <dataType>Number</dataType>
+        <name>varNewAsset</name>
+        <dataType>SObject</dataType>
         <isCollection>false</isCollection>
         <isInput>false</isInput>
         <isOutput>false</isOutput>
-        <scale>0</scale>
+        <objectType>Asset</objectType>
+    </variables>
+    <variables>
+        <name>varAssetsToCreate</name>
+        <dataType>SObject</dataType>
+        <isCollection>true</isCollection>
+        <isInput>false</isInput>
+        <isOutput>false</isOutput>
+        <objectType>Asset</objectType>
     </variables>
     <variables>
         <name>varChatterMessage</name>
