@@ -1,29 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Flow xmlns="http://soap.sforce.com/2006/04/metadata">
-    <apiVersion>61.0</apiVersion>
-    <description>Record-Triggered Flow: when a Quote is Contracted, create one Asset per Hardware Quote Line using bulk DML (single Create Records call outside the loop). Fault path calls FlowErrorHandler and posts the cleaned message to Chatter on the Quote.</description>
-    <environments>Default</environments>
-    <interviewLabel>Quote Contracted - Create Assets {!$Flow.CurrentDateTime}</interviewLabel>
-    <label>Quote Contracted - Create Assets</label>
-    <processMetadataValues>
-        <name>BuilderType</name>
-        <value>
-            <stringValue>LightningFlowBuilder</stringValue>
-        </value>
-    </processMetadataValues>
-    <processMetadataValues>
-        <name>CanvasMode</name>
-        <value>
-            <stringValue>AUTO_LAYOUT_CANVAS</stringValue>
-        </value>
-    </processMetadataValues>
-    <processType>AutoLaunchedFlow</processType>
-    <status>Active</status>
     <actionCalls>
         <name>Call_FlowErrorHandler</name>
         <label>Clean Fault Message</label>
-        <locationX>320</locationX>
-        <locationY>960</locationY>
+        <locationX>314</locationX>
+        <locationY>1163</locationY>
         <actionName>FlowErrorHandler</actionName>
         <actionType>apex</actionType>
         <connector>
@@ -37,15 +18,19 @@
             </value>
         </inputParameters>
         <nameSegment>FlowErrorHandler</nameSegment>
+        <offset>0</offset>
         <storeOutputAutomatically>true</storeOutputAutomatically>
     </actionCalls>
     <actionCalls>
-        <name>Post_Fault_To_Chatter</name>
-        <label>Post Fault to Chatter</label>
-        <locationX>320</locationX>
-        <locationY>1200</locationY>
+        <name>Post_Error_To_Chatter</name>
+        <label>Post Error to Chatter</label>
+        <locationX>314</locationX>
+        <locationY>1487</locationY>
         <actionName>chatterPost</actionName>
         <actionType>chatterPost</actionType>
+        <connector>
+            <targetReference>Build_Error_Event</targetReference>
+        </connector>
         <flowTransactionModel>CurrentTransaction</flowTransactionModel>
         <inputParameters>
             <name>subjectNameOrId</name>
@@ -60,36 +45,18 @@
             </value>
         </inputParameters>
         <nameSegment>chatterPost</nameSegment>
+        <offset>0</offset>
     </actionCalls>
     <actionCalls>
-        <name>Post_Success_To_Chatter</name>
-        <label>Post Success to Chatter</label>
-        <locationX>50</locationX>
-        <locationY>840</locationY>
+        <name>Post_NoHardware_To_Chatter</name>
+        <label>Post NoHardware to Chatter</label>
+        <locationX>578</locationX>
+        <locationY>947</locationY>
         <actionName>chatterPost</actionName>
         <actionType>chatterPost</actionType>
-        <flowTransactionModel>CurrentTransaction</flowTransactionModel>
-        <inputParameters>
-            <name>subjectNameOrId</name>
-            <value>
-                <elementReference>$Record.Id</elementReference>
-            </value>
-        </inputParameters>
-        <inputParameters>
-            <name>text</name>
-            <value>
-                <stringValue>Assets have been successfully created from this Contracted Quote.</stringValue>
-            </value>
-        </inputParameters>
-        <nameSegment>chatterPost</nameSegment>
-    </actionCalls>
-    <actionCalls>
-        <name>Post_No_Hardware_Lines_To_Chatter</name>
-        <label>Post No Hardware Lines to Chatter</label>
-        <locationX>180</locationX>
-        <locationY>840</locationY>
-        <actionName>chatterPost</actionName>
-        <actionType>chatterPost</actionType>
+        <connector>
+            <targetReference>Build_NoHardware_Event</targetReference>
+        </connector>
         <flowTransactionModel>CurrentTransaction</flowTransactionModel>
         <inputParameters>
             <name>subjectNameOrId</name>
@@ -104,12 +71,128 @@
             </value>
         </inputParameters>
         <nameSegment>chatterPost</nameSegment>
+        <offset>0</offset>
     </actionCalls>
+    <actionCalls>
+        <name>Post_Success_To_Chatter</name>
+        <label>Post Success to Chatter</label>
+        <locationX>50</locationX>
+        <locationY>1571</locationY>
+        <actionName>chatterPost</actionName>
+        <actionType>chatterPost</actionType>
+        <connector>
+            <targetReference>Build_Success_Event</targetReference>
+        </connector>
+        <flowTransactionModel>CurrentTransaction</flowTransactionModel>
+        <inputParameters>
+            <name>text</name>
+            <value>
+                <stringValue>Assets have been successfully created from this Contracted Quote.</stringValue>
+            </value>
+        </inputParameters>
+        <inputParameters>
+            <name>subjectNameOrId</name>
+            <value>
+                <elementReference>$Record.Id</elementReference>
+            </value>
+        </inputParameters>
+        <nameSegment>chatterPost</nameSegment>
+        <offset>0</offset>
+    </actionCalls>
+    <apiVersion>61.0</apiVersion>
+    <areMetricsLoggedToDataCloud>false</areMetricsLoggedToDataCloud>
+    <assignments>
+        <name>Add_Asset_To_Collection</name>
+        <label>Add Asset To Collection</label>
+        <locationX>402</locationX>
+        <locationY>647</locationY>
+        <assignmentItems>
+            <assignToReference>varAssetsToCreate</assignToReference>
+            <operator>Add</operator>
+            <value>
+                <elementReference>varNewAsset</elementReference>
+            </value>
+        </assignmentItems>
+        <connector>
+            <targetReference>Loop_QuoteLines</targetReference>
+        </connector>
+    </assignments>
+    <assignments>
+        <name>Append_Asset_Link</name>
+        <label>Append Asset Link</label>
+        <locationX>138</locationX>
+        <locationY>1379</locationY>
+        <assignmentItems>
+            <assignToReference>varChatterMessage</assignToReference>
+            <operator>Add</operator>
+            <value>
+                <elementReference>Loop_Created_Assets.Id</elementReference>
+            </value>
+        </assignmentItems>
+        <assignmentItems>
+            <assignToReference>varChatterMessage</assignToReference>
+            <operator>Add</operator>
+            <value>
+                <stringValue> </stringValue>
+            </value>
+        </assignmentItems>
+        <connector>
+            <targetReference>Loop_Created_Assets</targetReference>
+        </connector>
+    </assignments>
+    <assignments>
+        <name>Append_Cleaned_Reason</name>
+        <label>Append Cleaned Reason</label>
+        <locationX>314</locationX>
+        <locationY>1379</locationY>
+        <assignmentItems>
+            <assignToReference>varChatterMessage</assignToReference>
+            <operator>Add</operator>
+            <value>
+                <elementReference>Call_FlowErrorHandler.cleanedMessage</elementReference>
+            </value>
+        </assignmentItems>
+        <connector>
+            <targetReference>Post_Error_To_Chatter</targetReference>
+        </connector>
+    </assignments>
+    <assignments>
+        <name>Assign_Cleaned_Message</name>
+        <label>Build Error Body (Prefix)</label>
+        <locationX>314</locationX>
+        <locationY>1271</locationY>
+        <assignmentItems>
+            <assignToReference>varChatterMessage</assignToReference>
+            <operator>Assign</operator>
+            <value>
+                <stringValue>Asset creation failed. Reason: </stringValue>
+            </value>
+        </assignmentItems>
+        <connector>
+            <targetReference>Append_Cleaned_Reason</targetReference>
+        </connector>
+    </assignments>
+    <assignments>
+        <name>Assign_FaultToList</name>
+        <label>Wrap Fault as List</label>
+        <locationX>314</locationX>
+        <locationY>1055</locationY>
+        <assignmentItems>
+            <assignToReference>varRawMessagesList</assignToReference>
+            <operator>Add</operator>
+            <value>
+                <elementReference>$Flow.FaultMessage</elementReference>
+            </value>
+        </assignmentItems>
+        <connector>
+            <targetReference>Call_FlowErrorHandler</targetReference>
+        </connector>
+    </assignments>
     <assignments>
         <name>Build_Asset_In_Memory</name>
         <label>Build Asset In Memory</label>
-        <locationX>50</locationX>
-        <locationY>360</locationY>
+        <locationX>402</locationX>
+        <locationY>539</locationY>
         <assignmentItems>
             <assignToReference>varNewAsset.Name</assignToReference>
             <operator>Assign</operator>
@@ -171,76 +254,155 @@
         </connector>
     </assignments>
     <assignments>
-        <name>Add_Asset_To_Collection</name>
-        <label>Add Asset To Collection</label>
-        <locationX>50</locationX>
-        <locationY>480</locationY>
+        <name>Build_Error_Event</name>
+        <label>Build Error Event</label>
+        <locationX>314</locationX>
+        <locationY>1595</locationY>
         <assignmentItems>
-            <assignToReference>varAssetsToCreate</assignToReference>
-            <operator>Add</operator>
+            <assignToReference>varResultEvent.Quote_Id__c</assignToReference>
+            <operator>Assign</operator>
             <value>
-                <elementReference>varNewAsset</elementReference>
+                <elementReference>$Record.Id</elementReference>
+            </value>
+        </assignmentItems>
+        <assignmentItems>
+            <assignToReference>varResultEvent.Status__c</assignToReference>
+            <operator>Assign</operator>
+            <value>
+                <stringValue>Error</stringValue>
+            </value>
+        </assignmentItems>
+        <assignmentItems>
+            <assignToReference>varResultEvent.Message__c</assignToReference>
+            <operator>Assign</operator>
+            <value>
+                <elementReference>varChatterMessage</elementReference>
+            </value>
+        </assignmentItems>
+        <assignmentItems>
+            <assignToReference>varResultEvent.Asset_Count__c</assignToReference>
+            <operator>Assign</operator>
+            <value>
+                <numberValue>0.0</numberValue>
             </value>
         </assignmentItems>
         <connector>
-            <targetReference>Loop_QuoteLines</targetReference>
+            <targetReference>Publish_Error_Event</targetReference>
         </connector>
     </assignments>
     <assignments>
-        <name>Assign_Cleaned_Message</name>
-        <label>Build Chatter Error Body (Prefix)</label>
-        <locationX>320</locationX>
-        <locationY>1080</locationY>
+        <name>Build_NoHardware_Event</name>
+        <label>Build NoHardware Event</label>
+        <locationX>578</locationX>
+        <locationY>1055</locationY>
+        <assignmentItems>
+            <assignToReference>varResultEvent.Quote_Id__c</assignToReference>
+            <operator>Assign</operator>
+            <value>
+                <elementReference>$Record.Id</elementReference>
+            </value>
+        </assignmentItems>
+        <assignmentItems>
+            <assignToReference>varResultEvent.Status__c</assignToReference>
+            <operator>Assign</operator>
+            <value>
+                <stringValue>NoHardware</stringValue>
+            </value>
+        </assignmentItems>
+        <assignmentItems>
+            <assignToReference>varResultEvent.Message__c</assignToReference>
+            <operator>Assign</operator>
+            <value>
+                <stringValue>Quote was Contracted but contains no Hardware items.</stringValue>
+            </value>
+        </assignmentItems>
+        <assignmentItems>
+            <assignToReference>varResultEvent.Asset_Count__c</assignToReference>
+            <operator>Assign</operator>
+            <value>
+                <numberValue>0.0</numberValue>
+            </value>
+        </assignmentItems>
+        <connector>
+            <targetReference>Publish_NoHardware_Event</targetReference>
+        </connector>
+    </assignments>
+    <assignments>
+        <name>Build_Success_Event</name>
+        <label>Build Success Event</label>
+        <locationX>50</locationX>
+        <locationY>1679</locationY>
+        <assignmentItems>
+            <assignToReference>varResultEvent.Quote_Id__c</assignToReference>
+            <operator>Assign</operator>
+            <value>
+                <elementReference>$Record.Id</elementReference>
+            </value>
+        </assignmentItems>
+        <assignmentItems>
+            <assignToReference>varResultEvent.Status__c</assignToReference>
+            <operator>Assign</operator>
+            <value>
+                <stringValue>Success</stringValue>
+            </value>
+        </assignmentItems>
+        <assignmentItems>
+            <assignToReference>varResultEvent.Message__c</assignToReference>
+            <operator>Assign</operator>
+            <value>
+                <stringValue>Assets created from Contracted Quote.</stringValue>
+            </value>
+        </assignmentItems>
+        <assignmentItems>
+            <assignToReference>varResultEvent.Asset_Count__c</assignToReference>
+            <operator>Assign</operator>
+            <value>
+                <elementReference>varAssetCount</elementReference>
+            </value>
+        </assignmentItems>
+        <connector>
+            <targetReference>Publish_Success_Event</targetReference>
+        </connector>
+    </assignments>
+    <assignments>
+        <name>Count_Assets_Created</name>
+        <label>Count Assets Created</label>
+        <locationX>50</locationX>
+        <locationY>1055</locationY>
+        <assignmentItems>
+            <assignToReference>varAssetCount</assignToReference>
+            <operator>AssignCount</operator>
+            <value>
+                <elementReference>varAssetsToCreate</elementReference>
+            </value>
+        </assignmentItems>
+        <connector>
+            <targetReference>Init_Success_Message</targetReference>
+        </connector>
+    </assignments>
+    <assignments>
+        <name>Init_Success_Message</name>
+        <label>Init Success Message</label>
+        <locationX>50</locationX>
+        <locationY>1163</locationY>
         <assignmentItems>
             <assignToReference>varChatterMessage</assignToReference>
             <operator>Assign</operator>
             <value>
-                <stringValue>Asset creation failed. Reason: </stringValue>
+                <stringValue>Assets have been successfully created from this Contracted Quote. Created assets: </stringValue>
             </value>
         </assignmentItems>
         <connector>
-            <targetReference>Append_Cleaned_Reason</targetReference>
-        </connector>
-    </assignments>
-    <assignments>
-        <name>Append_Cleaned_Reason</name>
-        <label>Append Cleaned Reason</label>
-        <locationX>320</locationX>
-        <locationY>1140</locationY>
-        <assignmentItems>
-            <assignToReference>varChatterMessage</assignToReference>
-            <operator>Add</operator>
-            <value>
-                <elementReference>Call_FlowErrorHandler.cleanedMessage</elementReference>
-            </value>
-        </assignmentItems>
-        <connector>
-            <targetReference>Post_Fault_To_Chatter</targetReference>
-        </connector>
-    </assignments>
-    <assignments>
-        <name>Assign_FaultToList</name>
-        <label>Wrap Fault as List</label>
-        <locationX>320</locationX>
-        <locationY>840</locationY>
-        <assignmentItems>
-            <assignToReference>varRawMessagesList</assignToReference>
-            <operator>Add</operator>
-            <value>
-                <elementReference>$Flow.FaultMessage</elementReference>
-            </value>
-        </assignmentItems>
-        <connector>
-            <targetReference>Call_FlowErrorHandler</targetReference>
+            <targetReference>Loop_Created_Assets</targetReference>
         </connector>
     </assignments>
     <decisions>
         <name>Decision_Any_Assets_To_Create</name>
         <label>Any Assets To Create?</label>
-        <locationX>176</locationX>
-        <locationY>600</locationY>
+        <locationX>314</locationX>
+        <locationY>839</locationY>
         <defaultConnector>
-            <targetReference>Post_No_Hardware_Lines_To_Chatter</targetReference>
+            <targetReference>Post_NoHardware_To_Chatter</targetReference>
         </defaultConnector>
         <defaultConnectorLabel>No Hardware Lines</defaultConnectorLabel>
         <rules>
@@ -259,11 +421,29 @@
             <label>Yes</label>
         </rules>
     </decisions>
+    <description>Record-Triggered Flow: when a Quote is Contracted, create one Asset per Hardware Quote Line using bulk DML. Publishes Asset_Creation_Result__e (for LWC toast) AND posts to Chatter (audit trail). Success Chatter post includes clickable links to created assets.</description>
+    <environments>Default</environments>
+    <interviewLabel>Quote Contracted - Create Assets {!$Flow.CurrentDateTime}</interviewLabel>
+    <label>Quote Contracted - Create Assets</label>
+    <loops>
+        <name>Loop_Created_Assets</name>
+        <label>Loop Created Assets</label>
+        <locationX>50</locationX>
+        <locationY>1271</locationY>
+        <collectionReference>varAssetsToCreate</collectionReference>
+        <iterationOrder>Asc</iterationOrder>
+        <nextValueConnector>
+            <targetReference>Append_Asset_Link</targetReference>
+        </nextValueConnector>
+        <noMoreValuesConnector>
+            <targetReference>Post_Success_To_Chatter</targetReference>
+        </noMoreValuesConnector>
+    </loops>
     <loops>
         <name>Loop_QuoteLines</name>
         <label>Loop Quote Lines</label>
-        <locationX>176</locationX>
-        <locationY>240</locationY>
+        <locationX>314</locationX>
+        <locationY>431</locationY>
         <collectionReference>Get_Hardware_Quote_Lines</collectionReference>
         <iterationOrder>Asc</iterationOrder>
         <nextValueConnector>
@@ -273,24 +453,58 @@
             <targetReference>Decision_Any_Assets_To_Create</targetReference>
         </noMoreValuesConnector>
     </loops>
+    <processMetadataValues>
+        <name>BuilderType</name>
+        <value>
+            <stringValue>LightningFlowBuilder</stringValue>
+        </value>
+    </processMetadataValues>
+    <processMetadataValues>
+        <name>CanvasMode</name>
+        <value>
+            <stringValue>AUTO_LAYOUT_CANVAS</stringValue>
+        </value>
+    </processMetadataValues>
+    <processType>AutoLaunchedFlow</processType>
     <recordCreates>
         <name>Create_Assets_Bulk</name>
         <label>Create Assets (Bulk)</label>
         <locationX>50</locationX>
-        <locationY>720</locationY>
+        <locationY>947</locationY>
         <connector>
-            <targetReference>Post_Success_To_Chatter</targetReference>
+            <targetReference>Count_Assets_Created</targetReference>
         </connector>
         <faultConnector>
             <targetReference>Assign_FaultToList</targetReference>
         </faultConnector>
         <inputReference>varAssetsToCreate</inputReference>
     </recordCreates>
+    <recordCreates>
+        <name>Publish_Error_Event</name>
+        <label>Publish Error Event</label>
+        <locationX>314</locationX>
+        <locationY>1703</locationY>
+        <inputReference>varResultEvent</inputReference>
+    </recordCreates>
+    <recordCreates>
+        <name>Publish_NoHardware_Event</name>
+        <label>Publish NoHardware Event</label>
+        <locationX>578</locationX>
+        <locationY>1163</locationY>
+        <inputReference>varResultEvent</inputReference>
+    </recordCreates>
+    <recordCreates>
+        <name>Publish_Success_Event</name>
+        <label>Publish Success Event</label>
+        <locationX>50</locationX>
+        <locationY>1787</locationY>
+        <inputReference>varResultEvent</inputReference>
+    </recordCreates>
     <recordLookups>
         <name>Get_Hardware_Quote_Lines</name>
         <label>Get Hardware Quote Lines</label>
-        <locationX>176</locationX>
-        <locationY>120</locationY>
+        <locationX>314</locationX>
+        <locationY>323</locationY>
         <assignNullValuesIfNoRecordsFound>false</assignNullValuesIfNoRecordsFound>
         <connector>
             <targetReference>Loop_QuoteLines</targetReference>
@@ -315,7 +529,7 @@
         <storeOutputAutomatically>true</storeOutputAutomatically>
     </recordLookups>
     <start>
-        <locationX>50</locationX>
+        <locationX>188</locationX>
         <locationY>0</locationY>
         <connector>
             <targetReference>Get_Hardware_Quote_Lines</targetReference>
@@ -333,13 +547,14 @@
         <recordTriggerType>Update</recordTriggerType>
         <triggerType>RecordAfterSave</triggerType>
     </start>
+    <status>Active</status>
     <variables>
-        <name>varNewAsset</name>
-        <dataType>SObject</dataType>
+        <name>varAssetCount</name>
+        <dataType>Number</dataType>
         <isCollection>false</isCollection>
         <isInput>false</isInput>
         <isOutput>false</isOutput>
-        <objectType>Asset</objectType>
+        <scale>0</scale>
     </variables>
     <variables>
         <name>varAssetsToCreate</name>
@@ -357,10 +572,26 @@
         <isOutput>false</isOutput>
     </variables>
     <variables>
+        <name>varNewAsset</name>
+        <dataType>SObject</dataType>
+        <isCollection>false</isCollection>
+        <isInput>false</isInput>
+        <isOutput>false</isOutput>
+        <objectType>Asset</objectType>
+    </variables>
+    <variables>
         <name>varRawMessagesList</name>
         <dataType>String</dataType>
         <isCollection>true</isCollection>
         <isInput>false</isInput>
         <isOutput>false</isOutput>
+    </variables>
+    <variables>
+        <name>varResultEvent</name>
+        <dataType>SObject</dataType>
+        <isCollection>false</isCollection>
+        <isInput>false</isInput>
+        <isOutput>false</isOutput>
+        <objectType>Asset_Creation_Result__e</objectType>
     </variables>
 </Flow>
