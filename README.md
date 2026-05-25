@@ -75,7 +75,7 @@ docs/               Design docs, deployment guide, ERD
 - [`customerAssets`](force-app/main/default/lwc/customerAssets/) — Asset datatable
 - [`customerWarranties`](force-app/main/default/lwc/customerWarranties/) — Registration form (the addError showcase)
 - [`customerServiceRequests`](force-app/main/default/lwc/customerServiceRequests/) — Task list
-- - [`assetCreationToast`](force-app/main/default/lwc/assetCreationToast/) — Headless toast listener for `Asset_Creation_Result__e`
+- [`assetCreationToast`](force-app/main/default/lwc/assetCreationToast/) — Headless toast listener for `Asset_Creation_Result__e`
 
 ### Configuration
 - [`Warranty_Registration__c`](force-app/main/default/objects/Warranty_Registration__c/) — Custom object metadata
