@@ -138,19 +138,6 @@ After writing each Apex class, I used AI to help expand inline comments and Java
  
 After my production Apex was working correctly, I used AI to help me scaffold the corresponding test classes. I described the scenarios I wanted to cover (happy path, edge cases, bulk behavior, security guards) and AI generated the initial test method skeletons with `@TestSetup` data and assertion structure. I then reviewed every test, adjusted assertions to match my exact business intent, added scenarios AI hadn't suggested, and debugged failures iteratively. The test strategy — what to assert, what scenarios matter, what counts as good coverage — is mine; AI accelerated the rote mechanical work of writing `System.assertEquals(...)` boilerplate. The bulkification test specifically (the one that asserts `Limits.getQueries() < 10`) was my own contribution; that's the kind of hard-numeric assertion AI doesn't typically suggest unprompted.
  
-### What AI did NOT do
- 
-To be unambiguous: I personally designed, wrote, debugged, and own:
- 
-- The Apex business logic in `AssetService`, `WarrantyRegistrationTriggerHandler`, `CommunityPortalController`, and the trigger framework
-- The regex patterns and cleaning logic in `FlowErrorHandler`
-- The LWC components (HTML, JavaScript, and component composition)
-- The Record-Triggered Flow design, including the Platform Event publishing strategy and the fault path architecture
-- The custom object schema, sharing model decisions, and Master-Detail vs Lookup choices
-- The Platform Event design (when to fire it, what fields it should carry, how the LWC subscriber processes it)
-- All debugging — including the multi-day work to diagnose Community sharing issues, the Asset ContactId fix, and the Task `without sharing` helper
-I include this section because I believe transparency about AI assistance is the professional norm now. Used well, AI accelerates the documentation and scaffolding work that engineers traditionally spend significant time on, letting more focus go to design decisions, debugging, and architecture. That's how I used it here.
- 
 ---
 
 ## 📬 Contact
