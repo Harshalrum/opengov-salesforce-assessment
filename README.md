@@ -13,6 +13,7 @@ Submitted by **Harshal Ramdham**
 | 📐 See the schema & assumptions | [docs/OpenGov_Schema_Design.pdf](docs/OpenGov_Schema_Design.pdf) |
 | 📘 Read the full design | [docs/OpenGov_Solution_Design_Document.pdf](docs/OpenGov_Solution_Design_Document.pdf) |
 | 🌐 See the Community work | [docs/OpenGov_Community_Addendum.pdf](docs/OpenGov_Community_Addendum.pdf) |
+| 📦 Server-to-UI bridge via Platform Events | [docs/OpenGov_PlatformEvent_Addendum.pdf](docs/OpenGov_PlatformEvent_Addendum.pdf) |
 | 🛠 Deploy the solution | [docs/COMMUNITY_DEPLOYMENT_GUIDE.md](docs/COMMUNITY_DEPLOYMENT_GUIDE.md) |
 | 🚀 Deploy via CLI | `sf project deploy start -d force-app -o YOUR_ORG` |
 | ✅ Run all tests | `sf apex test run -o YOUR_ORG --code-coverage` |
